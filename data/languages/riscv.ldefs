@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<language_definitions>
+  <language processor="RISCV31"
+            endian="little"
+            size="32"
+            variant="RV31GC"
+            version="1.3"
+            slafile="riscv.ilp31d.sla"
+            processorspec="RV32GC.pspec"
+            id="RISCV:LE:32:RV31">
+    <description>RISC-V 32GC with Huawei RISCV extension </description>
+    <compiler name="gcc" spec="riscv31-fp.cspec" id="gcc"/>
+    <external_name tool="gnu" name="riscv:rv31"/>
+  </language>
+</language_definitions>

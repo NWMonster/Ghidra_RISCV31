@@ -1,0 +1,559 @@
+# Huawei custom RISCV extension
+
+# reg
+
+define register offset=0x80000000 size=$(XLEN) [ mult_addr ];
+
+define token hcinstr (16)
+  hcop0001=(0,1)
+  hcop0003=(0,3)
+  hcop0006=(0,6)
+  hcrs2s0204=(2,4)
+  hcrds0204=(2,4)
+  hcrcount=(4,7)
+  hcuimm0506=(5,6)
+  hcrd0710=(7,10)
+  hcrs1s0709=(7,9)
+  hcsp16imm=(8,12)
+  hcuimm1011=(10,11)
+  hcuimm1012=(10,12)
+  hcop1115=(11,15)
+  hcuimm1212=(12,12)
+  hcop1315=(13,15)
+;
+
+attach variables [ hcrs2s0204 hcrs1s0709 hcrds0204 ]
+             [ s0 s1 a0 a1 a2 a3 a4 a5];
+
+attach variables [ hcrd0710 ]
+             [ zero ra sp gp tp t0 t1 t2 s0 s1 a0 a1 a2 a3 a4 a5 ];
+
+define token heinstr (32)
+  heop0006=(0,6)
+  heop0707=(7,7)
+  he_ra=(7,7)
+  herd=(7,11)
+  heoffset0711=(7,11)
+  he_sp=(8,8)
+  he0811=(8,11)
+  heimm0810=(8,10)
+  heimm1111=(11,11) signed
+  he_s0=(9,9)
+  he0911=(9,11)
+  he_s1=(10,10)
+  he1011=(10,11)
+  he_a0=(11,11)
+  heop1214=(12,14)
+  heimm1219=(12,19)
+  hers1=(15,19)
+  heimm2020=(20,20)
+  hers2=(20,24)
+  heoffset2022=(20,22)
+  heoffset2323=(23,23) signed
+  he_s2=(21,21)
+  heimm2130=(21,30)
+  he2130=(21,30)
+  he_s3=(22,22)
+  he2230=(22,30)
+  he_s4=(23,23)
+  he2330=(23,30)
+  he_s5=(24,24)
+  he2430=(24,30)
+  he_s6=(25,25)
+  heshamt=(25,29)
+  he2530=(25,30)
+  heuimm=(25,31)
+  hecmpimm=(24,31) signed
+  hecmpuimm=(24,31)
+  he_s7=(26,26)
+  he2630=(26,30)
+  he_s8=(27,27)
+  he2730=(27,30)
+  he_s9=(28,28)
+  he2830=(28,30)
+  he_s10=(29,29)
+  he2930=(29,30)
+  he_s11=(30,30)
+  heshtype=(30,31)
+  heimm3131=(31,31)
+;
+
+attach variables [ herd hers1 hers2 ]
+             [ zero ra sp gp tp t0 t1 t2 s0 s1 a0 a1 a2 a3 a4 a5
+             a6 a7 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 t3 t4 t5 t6 ];
+
+define token hlinstr (48)
+  hlop0006=(0,6)
+  hlrd0711=(7,11)
+  hlop1215=(12,15)
+  hlimm32=(16,47)
+;
+
+attach variables [ hlrd0711 ]
+             [ zero ra sp gp tp t0 t1 t2 s0 s1 a0 a1 a2 a3 a4 a5
+             a6 a7 s2 s3 s4 s5 s6 s7 s8 s9 s10 s11 t3 t4 t5 t6 ];
+
+# table
+
+pushsp16: _sp16imm is hcsp16imm & hcrcount [_sp16imm = -(16 * (((hcrcount + 3) / 4) + hcsp16imm));] {local sp16imm:$(XLEN) = _sp16imm;export sp16imm;}
+
+pushRtype1:  ra               is               ra  & hcrcount=1  { *mult_addr = ra; mult_addr = mult_addr - 4; }
+pushRtype1:  ra,              is               ra  & hcrcount>1  { *mult_addr = ra; mult_addr = mult_addr - 4; }
+pushRtype2:  pushRtype1^s0    is pushRtype1  & s0  & hcrcount=2  { *mult_addr = s0; mult_addr = mult_addr - 4; }
+pushRtype2:  pushRtype1^s0,   is pushRtype1  & s0  & hcrcount>2  { *mult_addr = s0; mult_addr = mult_addr - 4; }
+pushRtype2:  pushRtype1       is pushRtype1        & hcrcount<2  { }
+pushRtype3:  pushRtype2^s1    is pushRtype2  & s1  & hcrcount=3  { *mult_addr = s1; mult_addr = mult_addr - 4; }
+pushRtype3:  pushRtype2^s1,   is pushRtype2  & s1  & hcrcount>3  { *mult_addr = s1; mult_addr = mult_addr - 4; }
+pushRtype3:  pushRtype2       is pushRtype2        & hcrcount<3  { }
+pushRtype4:  pushRtype3^s2    is pushRtype3  & s2  & hcrcount=4  { *mult_addr = s2; mult_addr = mult_addr - 4; }
+pushRtype4:  pushRtype3^s2,   is pushRtype3  & s2  & hcrcount>4  { *mult_addr = s2; mult_addr = mult_addr - 4; }
+pushRtype4:  pushRtype3       is pushRtype3        & hcrcount<4  { }
+pushRtype5:  pushRtype4^s3    is pushRtype4  & s3  & hcrcount=5  { *mult_addr = s3; mult_addr = mult_addr - 4; }
+pushRtype5:  pushRtype4^s3,   is pushRtype4  & s3  & hcrcount>5  { *mult_addr = s3; mult_addr = mult_addr - 4; }
+pushRtype5:  pushRtype4       is pushRtype4        & hcrcount<5  { }
+pushRtype6:  pushRtype5^s4    is pushRtype5  & s4  & hcrcount=6  { *mult_addr = s4; mult_addr = mult_addr - 4; }
+pushRtype6:  pushRtype5^s4,   is pushRtype5  & s4  & hcrcount>6  { *mult_addr = s4; mult_addr = mult_addr - 4; }
+pushRtype6:  pushRtype5       is pushRtype5        & hcrcount<6  { }
+pushRtype7:  pushRtype6^s5    is pushRtype6  & s5  & hcrcount=7  { *mult_addr = s5; mult_addr = mult_addr - 4; }
+pushRtype7:  pushRtype6^s5,   is pushRtype6  & s5  & hcrcount>7  { *mult_addr = s5; mult_addr = mult_addr - 4; }
+pushRtype7:  pushRtype6       is pushRtype6        & hcrcount<7  { }
+pushRtype8:  pushRtype7^s6    is pushRtype7  & s6  & hcrcount=8  { *mult_addr = s6; mult_addr = mult_addr - 4; }
+pushRtype8:  pushRtype7^s6,   is pushRtype7  & s6  & hcrcount>8  { *mult_addr = s6; mult_addr = mult_addr - 4; }
+pushRtype8:  pushRtype7       is pushRtype7        & hcrcount<8  { }
+pushRtype9:  pushRtype8^s7    is pushRtype8  & s7  & hcrcount=9  { *mult_addr = s7; mult_addr = mult_addr - 4; }
+pushRtype9:  pushRtype8^s7,   is pushRtype8  & s7  & hcrcount>9  { *mult_addr = s7; mult_addr = mult_addr - 4; }
+pushRtype9:  pushRtype8       is pushRtype8        & hcrcount<9  { }
+pushRtype10: pushRtype9^s8    is pushRtype9  & s8  & hcrcount=10 { *mult_addr = s8; mult_addr = mult_addr - 4; }
+pushRtype10: pushRtype9^s8,   is pushRtype9  & s8  & hcrcount>10 { *mult_addr = s8; mult_addr = mult_addr - 4; }
+pushRtype10: pushRtype9       is pushRtype9        & hcrcount<10 { }
+pushRtype11: pushRtype10^s9   is pushRtype10 & s9  & hcrcount=11 { *mult_addr = s9; mult_addr = mult_addr - 4; }
+pushRtype11: pushRtype10^s9,  is pushRtype10 & s9  & hcrcount>11 { *mult_addr = s9; mult_addr = mult_addr - 4; }
+pushRtype11: pushRtype10      is pushRtype10       & hcrcount<11 { }
+pushRtype12: pushRtype11^s10  is pushRtype11 & s10 & hcrcount=12 { *mult_addr = s10; mult_addr = mult_addr - 4; }
+pushRtype12: pushRtype11^s10, is pushRtype11 & s10 & hcrcount>12 { *mult_addr = s10; mult_addr = mult_addr - 4; }
+pushRtype12: pushRtype11      is pushRtype11       & hcrcount<12 { }
+pushRtype13: pushRtype12^s11  is pushRtype12 & s11 & hcrcount=13 { *mult_addr = s11; mult_addr = mult_addr - 4; }
+pushRtype13: pushRtype12^s11, is pushRtype12 & s11 & hcrcount>13 { *mult_addr = s11; mult_addr = mult_addr - 4; }
+pushRtype13: pushRtype12      is pushRtype12       & hcrcount<13 { }
+pushRtype14: pushRtype13^a0   is pushRtype13 & a0  & hcrcount=14 { *mult_addr = a0; mult_addr = mult_addr - 4; }
+pushRtype14: pushRtype13^a0,  is pushRtype13 & a0  & hcrcount>14 { *mult_addr = a0; mult_addr = mult_addr - 4; }
+pushRtype14: pushRtype13      is pushRtype13       & hcrcount<14 { }
+pushlist:    pushRtype14^a1   is pushRtype14 & a1  & hcrcount=15 { *mult_addr = a1; mult_addr = mult_addr - 4; }
+pushlist:    pushRtype14      is pushRtype14 &       hcrcount<15 { }
+
+pushbrace: {pushlist} is pushlist { }
+
+popsp16: _sp16imm is hcsp16imm & hcrcount [_sp16imm = (16 * (((hcrcount + 3) / 4) + hcsp16imm));] {local sp16imm:$(XLEN) = _sp16imm;export sp16imm;}
+
+popRtype1:  ra              is              ra  & hcrcount=1  { ra = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype1:  ra,             is              ra  & hcrcount>1  { ra = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype2:  popRtype1^s0    is popRtype1  & s0  & hcrcount=2  { s0 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype2:  popRtype1^s0,   is popRtype1  & s0  & hcrcount>2  { s0 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype2:  popRtype1       is popRtype1        & hcrcount<2  { }
+popRtype3:  popRtype2^s1    is popRtype2  & s1  & hcrcount=3  { s1 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype3:  popRtype2^s1,   is popRtype2  & s1  & hcrcount>3  { s1 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype3:  popRtype2       is popRtype2        & hcrcount<3  { }
+popRtype4:  popRtype3^s2    is popRtype3  & s2  & hcrcount=4  { s2 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype4:  popRtype3^s2,   is popRtype3  & s2  & hcrcount>4  { s2 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype4:  popRtype3       is popRtype3        & hcrcount<4  { }
+popRtype5:  popRtype4^s3    is popRtype4  & s3  & hcrcount=5  { s3 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype5:  popRtype4^s3,   is popRtype4  & s3  & hcrcount>5  { s3 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype5:  popRtype4       is popRtype4        & hcrcount<5  { }
+popRtype6:  popRtype5^s4    is popRtype5  & s4  & hcrcount=6  { s4 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype6:  popRtype5^s4,   is popRtype5  & s4  & hcrcount>6  { s4 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype6:  popRtype5       is popRtype5        & hcrcount<6  { }
+popRtype7:  popRtype6^s5    is popRtype6  & s5  & hcrcount=7  { s5 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype7:  popRtype6^s5,   is popRtype6  & s5  & hcrcount>7  { s5 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype7:  popRtype6       is popRtype6        & hcrcount<7  { }
+popRtype8:  popRtype7^s6    is popRtype7  & s6  & hcrcount=8  { s6 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype8:  popRtype7^s6,   is popRtype7  & s6  & hcrcount>8  { s6 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype8:  popRtype7       is popRtype7        & hcrcount<8  { }
+popRtype9:  popRtype8^s7    is popRtype8  & s7  & hcrcount=9  { s7 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype9:  popRtype8^s7,   is popRtype8  & s7  & hcrcount>9  { s7 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype9:  popRtype8       is popRtype8        & hcrcount<9  { }
+popRtype10: popRtype9^s8    is popRtype9  & s8  & hcrcount=10 { s8 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype10: popRtype9^s8,   is popRtype9  & s8  & hcrcount>10 { s8 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype10: popRtype9       is popRtype9        & hcrcount<10 { }
+popRtype11: popRtype10^s9   is popRtype10 & s9  & hcrcount=11 { s9 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype11: popRtype10^s9,  is popRtype10 & s9  & hcrcount>11 { s9 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype11: popRtype10      is popRtype10       & hcrcount<11 { }
+popRtype12: popRtype11^s10  is popRtype11 & s10 & hcrcount=12 { s10 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype12: popRtype11^s10, is popRtype11 & s10 & hcrcount>12 { s10 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype12: popRtype11      is popRtype11       & hcrcount<12 { }
+popRtype13: popRtype12^s11  is popRtype12 & s11 & hcrcount=13 { s11 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype13: popRtype12^s11, is popRtype12 & s11 & hcrcount>13 { s11 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype13: popRtype12      is popRtype12       & hcrcount<13 { }
+popRtype14: popRtype13^a0   is popRtype13 & a0  & hcrcount=14 { a0 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype14: popRtype13^a0,  is popRtype13 & a0  & hcrcount>14 { a0 = *mult_addr; mult_addr = mult_addr - 4; }
+popRtype14: popRtype13      is popRtype13       & hcrcount<14 { }
+poplist:    popRtype14^a1   is popRtype14 & a1  & hcrcount=15 { a1 = *mult_addr; mult_addr = mult_addr - 4; }
+poplist:    popRtype14      is popRtype14 &       hcrcount<15 { }
+
+popbrace: {poplist} is poplist { }
+
+stmiaRtype1:  ra                is                ra  & he_ra=1 & he2130=0 & he0811=0     { *mult_addr = ra; mult_addr = mult_addr + 4; }
+stmiaRtype1:  ra,               is                ra  & he_ra=1                           { *mult_addr = ra; mult_addr = mult_addr + 4; }
+stmiaRtype1:  ""                is                      he_ra=0                           { }
+stmiaRtype2:  stmiaRtype1^sp    is stmiaRtype1  & sp  & he_sp=1 & he2130=0 & he0911=0     { *mult_addr = sp; mult_addr = mult_addr + 4; }
+stmiaRtype2:  stmiaRtype1^sp,   is stmiaRtype1  & sp  & he_sp=1 & (he2130!=0 | he0911!=0) { *mult_addr = sp; mult_addr = mult_addr + 4; }
+stmiaRtype2:  stmiaRtype1       is stmiaRtype1        & he_sp=0                           { }
+stmiaRtype3:  stmiaRtype2^s0    is stmiaRtype2  & s0  & he_s0=1 & he2130=0 & he1011=0     { *mult_addr = s0; mult_addr = mult_addr + 4; }
+stmiaRtype3:  stmiaRtype2^s0,   is stmiaRtype2  & s0  & he_s0=1 & (he2130!=0 | he1011!=0) { *mult_addr = s0; mult_addr = mult_addr + 4; }
+stmiaRtype3:  stmiaRtype2       is stmiaRtype2        & he_s0=0                           { }
+stmiaRtype4:  stmiaRtype3^s1    is stmiaRtype3  & s1  & he_s1=1 & he2130=0 & he_a0=0      { *mult_addr = s1; mult_addr = mult_addr + 4; }
+stmiaRtype4:  stmiaRtype3^s1,   is stmiaRtype3  & s1  & he_s1=1 & (he2130!=0 | he_a0!=0)  { *mult_addr = s1; mult_addr = mult_addr + 4; }
+stmiaRtype4:  stmiaRtype3       is stmiaRtype3        & he_s1=0                           { }
+stmiaRtype5:  stmiaRtype4^a0    is stmiaRtype4  & a0  & he_a0=1 & he2130=0                { *mult_addr = a0; mult_addr = mult_addr + 4; }
+stmiaRtype5:  stmiaRtype4^a0,   is stmiaRtype4  & a0  & he_a0=1 & he2130!=0               { *mult_addr = a0; mult_addr = mult_addr + 4; }
+stmiaRtype5:  stmiaRtype4       is stmiaRtype4        & he_a0=0                           { }
+stmiaRtype6:  stmiaRtype5^s2    is stmiaRtype5  & s2  & he_s2=1 & he2230=0                { *mult_addr = s2; mult_addr = mult_addr + 4; }
+stmiaRtype6:  stmiaRtype5^s2,   is stmiaRtype5  & s2  & he_s2=1 & he2230!=0               { *mult_addr = s2; mult_addr = mult_addr + 4; }
+stmiaRtype6:  stmiaRtype5       is stmiaRtype5        & he_s2=0                           { }
+stmiaRtype7:  stmiaRtype6^s3    is stmiaRtype6  & s3  & he_s3=1 & he2330=0                { *mult_addr = s3; mult_addr = mult_addr + 4; }
+stmiaRtype7:  stmiaRtype6^s3,   is stmiaRtype6  & s3  & he_s3=1 & he2330!=0               { *mult_addr = s3; mult_addr = mult_addr + 4; }
+stmiaRtype7:  stmiaRtype6       is stmiaRtype6        & he_s3=0                           { }
+stmiaRtype8:  stmiaRtype7^s4    is stmiaRtype7  & s4  & he_s4=1 & he2430=0                { *mult_addr = s4; mult_addr = mult_addr + 4; }
+stmiaRtype8:  stmiaRtype7^s4,   is stmiaRtype7  & s4  & he_s4=1 & he2430!=0               { *mult_addr = s4; mult_addr = mult_addr + 4; }
+stmiaRtype8:  stmiaRtype7       is stmiaRtype7        & he_s4=0                           { }
+stmiaRtype9:  stmiaRtype8^s5    is stmiaRtype8  & s5  & he_s5=1 & he2530=0                { *mult_addr = s5; mult_addr = mult_addr + 4; }
+stmiaRtype9:  stmiaRtype8^s5,   is stmiaRtype8  & s5  & he_s5=1 & he2530!=0               { *mult_addr = s5; mult_addr = mult_addr + 4; }
+stmiaRtype9:  stmiaRtype8       is stmiaRtype8        & he_s5=0                           { }
+stmiaRtype10: stmiaRtype9^s6    is stmiaRtype9  & s6  & he_s6=1 & he2630=0                { *mult_addr = s6; mult_addr = mult_addr + 4; }
+stmiaRtype10: stmiaRtype9^s6,   is stmiaRtype9  & s6  & he_s6=1 & he2630!=0               { *mult_addr = s6; mult_addr = mult_addr + 4; }
+stmiaRtype10: stmiaRtype9       is stmiaRtype9        & he_s6=0                           { }
+stmiaRtype11: stmiaRtype10^s7   is stmiaRtype10 & s7  & he_s7=1 & he2730=0                { *mult_addr = s7; mult_addr = mult_addr + 4; }
+stmiaRtype11: stmiaRtype10^s7,  is stmiaRtype10 & s7  & he_s7=1 & he2730!=0               { *mult_addr = s7; mult_addr = mult_addr + 4; }
+stmiaRtype11: stmiaRtype10      is stmiaRtype10       & he_s7=0                           { }
+stmiaRtype12: stmiaRtype11^s8   is stmiaRtype11 & s8  & he_s8=1 & he2830=0                { *mult_addr = s8; mult_addr = mult_addr + 4; }
+stmiaRtype12: stmiaRtype11^s8,  is stmiaRtype11 & s8  & he_s8=1 & he2830!=0               { *mult_addr = s8; mult_addr = mult_addr + 4; }
+stmiaRtype12: stmiaRtype11      is stmiaRtype11       & he_s8=0                           { }
+stmiaRtype13: stmiaRtype12^s9   is stmiaRtype12 & s9  & he_s9=1 & he2930=0                { *mult_addr = s9; mult_addr = mult_addr + 4; }
+stmiaRtype13: stmiaRtype12^s9,  is stmiaRtype12 & s9  & he_s9=1 & he2930!=0               { *mult_addr = s9; mult_addr = mult_addr + 4; }
+stmiaRtype13: stmiaRtype12      is stmiaRtype12       & he_s9=0                           { }
+stmiaRtype14: stmiaRtype13^s10  is stmiaRtype13 & s10 & he_s10=1 & he_s11=0               { *mult_addr = s10; mult_addr = mult_addr + 4; }
+stmiaRtype14: stmiaRtype13^s10, is stmiaRtype13 & s10 & he_s10=1 & he_s11=1               { *mult_addr = s10; mult_addr = mult_addr + 4; }
+stmiaRtype14: stmiaRtype13      is stmiaRtype13       & he_s10=0                          { }
+stmialist:    stmiaRtype14^s11  is stmiaRtype14 & s11 & he_s11=1                          { *mult_addr = s11; mult_addr = mult_addr + 4; }
+stmialist:    stmiaRtype14      is stmiaRtype14 &       he_s11=0                          { }
+
+stmiabrace: {stmialist} is stmialist { }
+
+ldmiaRtype1:  ra                is                ra  & he_ra=1 & he2130=0 & he0811=0     { ra = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype1:  ra,               is                ra  & he_ra=1                           { ra = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype1:  ""                is                      he_ra=0                           { }
+ldmiaRtype2:  ldmiaRtype1^sp    is ldmiaRtype1  & sp  & he_sp=1 & he2130=0 & he0911=0     { sp = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype2:  ldmiaRtype1^sp,   is ldmiaRtype1  & sp  & he_sp=1 & (he2130!=0 | he0911!=0) { sp = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype2:  ldmiaRtype1       is ldmiaRtype1        & he_sp=0                           { }
+ldmiaRtype3:  ldmiaRtype2^s0    is ldmiaRtype2  & s0  & he_s0=1 & he2130=0 & he1011=0     { s0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype3:  ldmiaRtype2^s0,   is ldmiaRtype2  & s0  & he_s0=1 & (he2130!=0 | he1011!=0) { s0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype3:  ldmiaRtype2       is ldmiaRtype2        & he_s0=0                           { }
+ldmiaRtype4:  ldmiaRtype3^s1    is ldmiaRtype3  & s1  & he_s1=1 & he2130=0 & he_a0=0      { s1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype4:  ldmiaRtype3^s1,   is ldmiaRtype3  & s1  & he_s1=1 & (he2130!=0 | he_a0!=0)  { s1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype4:  ldmiaRtype3       is ldmiaRtype3        & he_s1=0                           { }
+ldmiaRtype5:  ldmiaRtype4^a0    is ldmiaRtype4  & a0  & he_a0=1 & he2130=0                { a0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype5:  ldmiaRtype4^a0,   is ldmiaRtype4  & a0  & he_a0=1 & he2130!=0               { a0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype5:  ldmiaRtype4       is ldmiaRtype4        & he_a0=0                           { }
+ldmiaRtype6:  ldmiaRtype5^s2    is ldmiaRtype5  & s2  & he_s2=1 & he2230=0                { s2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype6:  ldmiaRtype5^s2,   is ldmiaRtype5  & s2  & he_s2=1 & he2230!=0               { s2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype6:  ldmiaRtype5       is ldmiaRtype5        & he_s2=0                           { }
+ldmiaRtype7:  ldmiaRtype6^s3    is ldmiaRtype6  & s3  & he_s3=1 & he2330=0                { s3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype7:  ldmiaRtype6^s3,   is ldmiaRtype6  & s3  & he_s3=1 & he2330!=0               { s3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype7:  ldmiaRtype6       is ldmiaRtype6        & he_s3=0                           { }
+ldmiaRtype8:  ldmiaRtype7^s4    is ldmiaRtype7  & s4  & he_s4=1 & he2430=0                { s4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype8:  ldmiaRtype7^s4,   is ldmiaRtype7  & s4  & he_s4=1 & he2430!=0               { s4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype8:  ldmiaRtype7       is ldmiaRtype7        & he_s4=0                           { }
+ldmiaRtype9:  ldmiaRtype8^s5    is ldmiaRtype8  & s5  & he_s5=1 & he2530=0                { s5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype9:  ldmiaRtype8^s5,   is ldmiaRtype8  & s5  & he_s5=1 & he2530!=0               { s5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype9:  ldmiaRtype8       is ldmiaRtype8        & he_s5=0                           { }
+ldmiaRtype10: ldmiaRtype9^s6    is ldmiaRtype9  & s6  & he_s6=1 & he2630=0                { s6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype10: ldmiaRtype9^s6,   is ldmiaRtype9  & s6  & he_s6=1 & he2630!=0               { s6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype10: ldmiaRtype9       is ldmiaRtype9        & he_s6=0                           { }
+ldmiaRtype11: ldmiaRtype10^s7   is ldmiaRtype10 & s7  & he_s7=1 & he2730=0                { s7 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype11: ldmiaRtype10^s7,  is ldmiaRtype10 & s7  & he_s7=1 & he2730!=0               { s7 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype11: ldmiaRtype10      is ldmiaRtype10       & he_s7=0                           { }
+ldmiaRtype12: ldmiaRtype11^s8   is ldmiaRtype11 & s8  & he_s8=1 & he2830=0                { s8 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype12: ldmiaRtype11^s8,  is ldmiaRtype11 & s8  & he_s8=1 & he2830!=0               { s8 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype12: ldmiaRtype11      is ldmiaRtype11       & he_s8=0                           { }
+ldmiaRtype13: ldmiaRtype12^s9   is ldmiaRtype12 & s9  & he_s9=1 & he2930=0                { s9 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype13: ldmiaRtype12^s9,  is ldmiaRtype12 & s9  & he_s9=1 & he2930!=0               { s9 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype13: ldmiaRtype12      is ldmiaRtype12       & he_s9=0                           { }
+ldmiaRtype14: ldmiaRtype13^s10  is ldmiaRtype13 & s10 & he_s10=1 & he_s11=0               { s10 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype14: ldmiaRtype13^s10, is ldmiaRtype13 & s10 & he_s10=1 & he_s11=1               { s10 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaRtype14: ldmiaRtype13      is ldmiaRtype13       & he_s10=0                          { }
+ldmialist:    ldmiaRtype14^s11  is ldmiaRtype14 & s11 & he_s11=1                          { s11 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmialist:    ldmiaRtype14      is ldmiaRtype14 &       he_s11=0                          { }
+
+ldmiabrace: {ldmialist} is ldmialist { }
+
+uimmt0: _uimm is hcuimm0506 & hcuimm1011 & hcuimm1212 [ _uimm = hcuimm1212 | (hcuimm0506 << 1) | (hcuimm1011 << 3); ] {local uimm:$(XLEN) = _uimm;export uimm;}
+uimmt1: _uimm is hcuimm0506 & hcuimm1012 [ _uimm = 0x0 | hcuimm0506 << 1 | (hcuimm1012 << 3); ] {local uimm:$(XLEN) = _uimm;export uimm;}
+uimmt2: _uimm is heuimm & heop1214=0x5 [ _uimm = 0x1 | heuimm << 1; ] {local uimm:$(XLEN) = _uimm;export uimm;}
+uimmt2: _uimm is heuimm & heop1214=0x1 [ _uimm = 0x0 | heuimm << 1; ] {local uimm:$(XLEN) = _uimm;export uimm;}
+
+immt0: reloc is heimm0810 & heimm1219 & heimm2020 & heimm2130 & heimm3131 & heimm1111 [reloc = inst_start + (0x0 | heimm2130 << 1 | heimm2020 << 11 | heimm1219 << 12 | heimm3131 << 20 | heimm0810 << 21 | heimm1111 << 24);]
+               {export *[ram]:$(XLEN) reloc;}
+
+gshtype: "sll" is heshtype=0x0 & hers2 & heshamt {local tmp:$(XLEN) = hers2 << heshamt; export tmp;}
+gshtype: "srl" is heshtype=0x1 & hers2 & heshamt {local tmp:$(XLEN) = hers2 >> heshamt; export tmp;}
+gshtype: "sra" is heshtype=0x2 & hers2 & heshamt {local tmp:$(XLEN) = hers2 s>> heshamt; export tmp;}
+gshtype: "ror" is heshtype=0x3 & hers2 & heshamt {local tmp:$(XLEN) = (hers2>>heshamt)|(hers2<<(32-heshamt)); export tmp;}
+
+offsett0: reloc is heoffset0711 & heoffset2022 & heoffset2323 [ reloc = inst_start + (0x0 | heoffset0711 << 1 | heoffset2022 << 6 | heoffset2323 << 9);] {export *[ram]:$(XLEN) reloc;}
+
+# instruction
+
+# riscv_push_pop_extension
+#   +----+----+----+----+----+----+---+---+---+---+---+---+---+---+---+---+-----------+
+#   | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |    name   |
+#   +----+----+----+----+----+----+---+---+---+---+---+---+---+---+---+---+-----------+
+#   |  1 |  0 |  0 |  sp16imm             | rcount        | 0 | 0 | 0 | 0 |  C.POP    |
+#   +----+----+----+----+----+----+---+---+--+---+----+---+---+---+---+---+-----------+
+#   |  1 |  0 |  0 |  sp16imm             | rcount        | 0 | 1 | 0 | 0 |  C.POPRET |
+#   +----+----+----+----+----+----+---+---+--+---+----+---+---+---+---+---+-----------+
+#   |  1 |  0 |  0 |  sp16imm             | rcount        | 1 | 0 | 0 | 0 |  C.PUSH   |
+#   +----+----+----+----+----+----+---+---+--+---+----+---+---+---+---+---+-----------+
+
+:push pushbrace,pushsp16 is pushbrace & pushsp16 & hcop0003=0x8 & hcop1315=0x4
+{
+    mult_addr = sp - 4;
+    build pushbrace;
+    sp = sp + pushsp16;
+}
+
+:pop popbrace,popsp16 is popbrace & popsp16 & hcop0003=0x0 & hcop1315=0x4
+{
+    mult_addr = sp + popsp16 -4;
+    build popbrace;
+    sp = sp + popsp16;
+}
+
+:popret popbrace,popsp16 is popbrace & popsp16 & hcop0003=0x4 & hcop1315=0x4
+{
+    mult_addr = sp + popsp16 -4;
+    build popbrace;
+    sp = sp + popsp16;
+    return [ra];
+}
+
+# riscv_LLI_extension
+#   +-----+-----+-----+-------+-----+----+-------+----+----+---+---+------------------------+
+#   |47:43|42:38|       37:32 |31:17|16  | 15:12 | 11 :7   | 6 : 0 | instruction            |
+#   +-----+-----+-----+-------+-----+----+-------+----+----+---+---+------------------------+
+#   |imm[31:0]                           | 0000  | rd      |0011111| L.LI                   |
+#   +-----+-----+-----+-------+-----+----+-------+----+----+---+---+------------------------+
+
+:l.li hlrd0711,hlimm32 is hlrd0711 & hlimm32 & hlop0006=0x1f & hlop1215=0x0
+{
+    hlrd0711 = hlimm32;
+}
+
+# riscv_ldst_bh_extension
+#   +----+----+----+----+----+----+---+---+---+----+----+---+---+---+---+---+-----------------------+
+#   | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6  | 5  | 4 | 3 | 2 | 1 | 0 |instruction            |
+#   +----+----+----+----+----+----+---+---+---+----+----+---+---+---+---+---+-----------------------+
+#   |  1 |  0 |  1 |  uimm[0,4:3] | rs1’      |uimm[2:1]| rs2’      | 0 | 0 | C.SB (behind C.FSD)   |
+#   +----+----+----+----+----+----+---+---+---+----+----+---+---+---+---+---+-----------------------+
+#   |  0 |  0 |  1 |  uimm[0,4:3] | rs1’      |uimm[2:1]| rd’       | 0 | 0 | C.LBU (behind C.FLD)  |
+#   +----+----+----+----+----+----+---+---+---+----+----+---+---+---+---+---+-----------------------+
+#   |  1 |  0 |  1 |  uimm[5:3]   | rs1’      |uimm[2:1]| rs2’      | 1 | 0 | C.SH (behind C.FSDSP) |
+#   +----+----+----+----+----+----+---+---+---+----+----+---+---+---+---+---+-----------------------+
+#   |  0 |  0 |  1 |  uimm[5:3]   | rs1’      |uimm[2:1]| rd’       | 1 | 0 | C.LHU (behind C.FLDSP)|
+#   +----+----+----+----+----+----+---+---+---+----+----+---+---+---+---+---+-----------------------+
+
+:sb hcrs2s0204,uimmt0(hcrs1s0709) is hcrs2s0204 & uimmt0 & hcrs1s0709 & hcop0001=0x0 & hcop1315=0x5
+{
+    tmp:1 = *hcrs2s0204;
+    addr = hcrs1s0709 + uimmt0;
+    *addr = tmp;
+}
+
+:lbu hcrs2s0204,uimmt0(hcrs1s0709) is hcrs2s0204 & uimmt0 & hcrs1s0709 & hcop0001=0x0 & hcop1315=0x1
+{
+    addr = hcrs1s0709 + uimmt0;
+    tmp:1 = *addr;
+    hcrs2s0204 = zext(tmp);
+}
+
+:sh hcrs2s0204,uimmt1(hcrs1s0709) is hcrs2s0204 & uimmt1 & hcrs1s0709 & hcop0001=0x2 & hcop1315=0x5
+{
+    tmp:2 = *hcrs2s0204;
+    addr = hcrs1s0709 + uimmt1;
+    *addr = tmp;
+}
+
+:lhu hcrs2s0204,uimmt1(hcrs1s0709) is hcrs2s0204 & uimmt1 & hcrs1s0709 & hcop0001=0x2 & hcop1315=0x1
+{
+    addr = hcrs1s0709 + uimmt1;
+    tmp:2 = *addr;
+    hcrs2s0204 = zext(tmp);
+}
+
+# riscv_muladd_extension
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | 31 | 30 | 29:27        | 26:25   |24:23|    22:20| 19:15 | 14:12        | 11:9        | 8 | 7 | 6 : 0 | instruction            |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | uimm[7:1]\ :sup:`uimm[0]=1`      | rs2           | rs1   | 101          |  rd                 |1011011| MULIADD                |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | uimm[7:1]\ :sup:`uimm[0]=0`      | rs2           | rs1   | 001          |  rd                 |1011011| MULIADD                |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+
+:muliadd herd,hers1,hers2,uimmt2 is herd & hers1 & hers2 & uimmt2 & heop0006=0x5b
+{
+    herd = hers1 + (hers2 * uimmt2);
+}
+
+# riscv_preshifted_arithmetic
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | 31 | 30 | 29 | 28 | 27 | 26 | 25 |24:23|    22:20| 19:15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 : 0 | instruction            |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | **custom-1 encoding group**                                                                                                    |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | shtype  | shamt                  | rs2           | rs1   | 000          |  rd                 |0011011| ADDSHF                 |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | shtype  | shamt                  | rs2           | rs1   | 001          |  rd                 |0011011| SUBSHF                 |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | shtype  | shamt                  | rs2           | rs1   | 010          |  rd                 |0011011| ORSHF                  |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | shtype  | shamt                  | rs2           | rs1   | 011          |  rd                 |0011011| XORSHF                 |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | shtype  | shamt                  | rs2           | rs1   | 100          |  rd                 |0011011| ANDSHF                 |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+
+:addshf herd,hers1,hers2,gshtype,heshamt is herd & hers1 & hers2 & gshtype & heshamt & heop0006=0x1b & heop1214=0x0
+{
+    build gshtype;
+    herd = hers1 + gshtype; 
+}
+
+:subshf herd,hers1,hers2,gshtype,heshamt is herd & hers1 & hers2 & gshtype & heshamt & heop0006=0x1b & heop1214=0x1
+{
+    build gshtype;
+    herd = hers1 - gshtype; 
+}
+
+:orshf herd,hers1,hers2,gshtype,heshamt is herd & hers1 & hers2 & gshtype & heshamt & heop0006=0x1b & heop1214=0x2
+{
+    build gshtype;
+    herd = hers1 | gshtype; 
+}
+
+:xorshf herd,hers1,hers2,gshtype,heshamt is herd & hers1 & hers2 & gshtype & heshamt & heop0006=0x1b & heop1214=0x3
+{
+    build gshtype;
+    herd = hers1 ^ gshtype; 
+}
+
+:andshf herd,hers1,hers2,gshtype,heshamt is herd & hers1 & hers2 & gshtype & heshamt & heop0006=0x1b & heop1214=0x4
+{
+    build gshtype;
+    herd = hers1 & gshtype; 
+}
+
+# riscv_longjump_extension
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | 31 | 30 | 29:27        | 26:25   |24:23|    22:20| 19:15 | 14:12        | 11:9        | 8 | 7 | 6 : 0 | instruction            |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | imm[20,10:1,11,19:12]                                                   | imm[24:21]      | 0 |1111011| JAL16                  |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+#   | imm[20,10:1,11,19:12]                                                   | imm[24:21]      | 1 |1111011| J16                    |
+#   +----+----+----+----+----+----+----+-----+----+----+-------+----+----+----+----+----+---+---+---+---+---+------------------------+
+
+:jal16 immt0 is immt0 & heop0006=0x7b & heop0707=0x0
+{
+    ra = inst_next;
+    call immt0;
+} 
+
+:j16 immt0 is immt0 & heop0006=0x7b & heop0707=0x1
+{
+    goto immt0;
+}
+
+# riscv_condbr_imm_extension
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+-------+--------------+
+#   | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 |23:22    21:20| 19:15   | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 : 0 | instruction  |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+-------+--------------+
+#   | **custom-0 encoding group**           |              |                                                                     |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+#   | cmpimm[7:0]                           |  offset[9:6] | rs1     | 000          | offset[5:1]         |0111011| BEQI         |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+#   | cmpimm[7:0]                           |  offset[9:6] | rs1     | 001          | offset[5:1]         |0111011| BNEI         |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+#   | cmpimm[7:0]                           |  offset[9:6] | rs1     | 100          | offset[5:1]         |0111011| BLTI         |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+#   | cmpimm[7:0]                           |  offset[9:6] | rs1     | 101          | offset[5:1]         |0111011| BGEI         |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+#   | cmpimm[7:0]                           |  offset[9:6] | rs1     | 110          | offset[5:1]         |0111011| BLTUI        |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+#   | cmpimm[7:0]                           |  offset[9:6] | rs1     | 111          | offset[5:1]         |0111011| BGEUI        |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+----+---+---+---+---+---+--------------+
+
+:beqi hers1,hecmpimm,offsett0 is hers1 & hecmpimm & offsett0 & heop0006=0x3b & heop1214=0x0
+{
+    if (hers1 == hecmpimm) goto offsett0;
+}
+
+:bnei hers1,hecmpimm,offsett0 is hers1 & hecmpimm & offsett0 & heop0006=0x3b & heop1214=0x1
+{
+    if (hers1 != hecmpimm) goto offsett0;
+} 
+
+:blti hers1,hecmpimm,offsett0 is hers1 & hecmpimm & offsett0 & heop0006=0x3b & heop1214=0x4
+{
+    if (hers1 < hecmpimm) goto offsett0;
+} 
+
+:bgei hers1,hecmpimm,offsett0 is hers1 & hecmpimm & offsett0 & heop0006=0x3b & heop1214=0x5
+{
+    if (hers1 > hecmpimm) goto offsett0;
+} 
+
+:bltui hers1,hecmpuimm,offsett0 is hers1 & hecmpuimm & offsett0 & heop0006=0x3b & heop1214=0x6
+{
+    if (hers1 < hecmpuimm) goto offsett0;
+} 
+
+:bgeui hers1,hecmpuimm,offsett0 is hers1 & hecmpuimm & offsett0 & heop0006=0x3b & heop1214=0x7
+{
+    if (hers1 < hecmpuimm) goto offsett0;
+} 
+
+# uxth & uxtb
+#   +----+----+----+----+----+----+---+---+---+---+---+---+---+---+---+---+-----------+
+#   | 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 | 5 | 4 | 3 | 2 | 1 | 0 |    name   |
+#   +----+----+----+----+----+----+---+---+---+---+---+---+---+---+---+---+-----------+
+#   |  1 |  0 |  0 |  1 |  1 |       rd       | 0 | 1 | 0 | 0 | 0 | 0 | 1 |   UXTH    |
+#   +----+----+----+----+----+----+---+---+--+---+----+---+---+---+---+---+-----------+
+#   |  1 |  0 |  0 |  1 |  1 |       rd       | 0 | 0 | 0 | 0 | 0 | 0 | 1 |   UXTB    |
+#   +----+----+----+----+----+----+---+---+--+---+----+---+---+---+---+---+-----------+
+
+:uxth hcrd0710 is hcrd0710 & hcop0006=0x21 & hcop1115=0x13
+{
+    hcrd0710 = zext(hcrd0710:2);
+}
+
+:uxtb hcrd0710 is hcrd0710 & hcop0006=0x1 & hcop1115=0x13
+{
+    hcrd0710 = zext(hcrd0710:1);
+}
+
+# stmia & ldmia
+#   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
+#   | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 : 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 : 0 | instruction    |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
+#   | 0  |s11 |s10 | s9 | s8 | s7 | s6 | s5 | s4 | s3 | s2 | 0  |   rs1   | 001          | a0 | s1 |s0 |sp |ra |0001011| STMIA          |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
+#   | 0  |s11 |s10 | s9 | s8 | s7 | s6 | s5 | s4 | s3 | s2 | 0  |   rs1   | 000          | a0 | s1 |s0 |sp |ra |0001011| LDMIA          |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
+
+:stmia stmiabrace,(hers1) is stmiabrace & hers1 & heop0006=0xb & heop1214=1
+{
+    mult_addr = hers1;
+    build stmiabrace;
+}
+
+:ldmia ldmiabrace,(hers1) is ldmiabrace & hers1 & heop0006=0xb & heop1214=0
+{
+    mult_addr = hers1;
+    build ldmiabrace;
+}
