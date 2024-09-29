@@ -6,7 +6,7 @@
             size="32"
             variant="RV31GC"
             version="1.3"
-            slafile="riscv.ilp31d.sla"
+            slafile="riscv.ilp31f.sla"
             processorspec="RV32GC.pspec"
             id="RISCV:LE:32:RV31">
     <description>RISC-V 32GC with Huawei RISCV extension </description>

@@ -117,10 +117,10 @@
 
 ## Installation
 - Copy this project to the `\Ghidra\Processors\` directory.
-- Compile `riscv.ilp31d.slaspec` with sleigh.
+- Compile `riscv.ilp31f.slaspec` with sleigh.
 ```
 Example in Windows environment:
-.\sleigh.bat ..\Ghidra\Processors\RISCV31\data\languages\riscv.ilp31d.slaspec
+.\sleigh.bat ..\Ghidra\Processors\RISCV31\data\languages\riscv.ilp31f.slaspec
 ```
 
 ## References
