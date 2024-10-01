@@ -35,46 +35,62 @@ define token heinstr (32)
   herd=(7,11)
   heoffset0711=(7,11)
   he_sp=(8,8)
+  he_t0=(8,8)
   he0811=(8,11)
   heimm0810=(8,10)
   heimm1111=(11,11) signed
   he_s0=(9,9)
+  he_t1=(9,9)
   he0911=(9,11)
   he_s1=(10,10)
+  he_t2=(10,10)
   he1011=(10,11)
   he_a0=(11,11)
   heop1214=(12,14)
   heimm1219=(12,19)
   hers1=(15,19)
   heimm2020=(20,20)
+  he_a1=(20,20)
+  he2030=(20,30)
   hers2=(20,24)
   heoffset2022=(20,22)
-  heoffset2323=(23,23) signed
   he_s2=(21,21)
+  he_a2=(21,21)
   heimm2130=(21,30)
   he2130=(21,30)
   he_s3=(22,22)
+  he_a3=(22,22)
   he2230=(22,30)
+  heoffset2323=(23,23) signed
   he_s4=(23,23)
+  he_a4=(23,23)
   he2330=(23,30)
   he_s5=(24,24)
+  he_a5=(24,24)
   he2430=(24,30)
   he_s6=(25,25)
+  he_a6=(25,25)
   heshamt=(25,29)
   he2530=(25,30)
   heuimm=(25,31)
   hecmpimm=(24,31) signed
   hecmpuimm=(24,31)
   he_s7=(26,26)
+  he_a7=(26,26)
   he2630=(26,30)
   he_s8=(27,27)
+  he_t3=(27,27)
   he2730=(27,30)
   he_s9=(28,28)
+  he_t4=(28,28)
   he2830=(28,30)
   he_s10=(29,29)
+  he_t5=(29,29)
   he2930=(29,30)
   he_s11=(30,30)
+  he_t6=(30,30)
   heshtype=(30,31)
+  he3131=(31,31)
   heimm3131=(31,31)
 ;
 
@@ -191,99 +207,204 @@ poplist:    popRtype14      is popRtype14 &       hcrcount<15 { }
 
 popbrace: {poplist} is poplist { }
 
-stmiaRtype1:  ra                is                ra  & he_ra=1 & he2130=0 & he0811=0     { *mult_addr = ra; mult_addr = mult_addr + 4; }
-stmiaRtype1:  ra,               is                ra  & he_ra=1                           { *mult_addr = ra; mult_addr = mult_addr + 4; }
-stmiaRtype1:  ""                is                      he_ra=0                           { }
-stmiaRtype2:  stmiaRtype1^sp    is stmiaRtype1  & sp  & he_sp=1 & he2130=0 & he0911=0     { *mult_addr = sp; mult_addr = mult_addr + 4; }
-stmiaRtype2:  stmiaRtype1^sp,   is stmiaRtype1  & sp  & he_sp=1 & (he2130!=0 | he0911!=0) { *mult_addr = sp; mult_addr = mult_addr + 4; }
-stmiaRtype2:  stmiaRtype1       is stmiaRtype1        & he_sp=0                           { }
-stmiaRtype3:  stmiaRtype2^s0    is stmiaRtype2  & s0  & he_s0=1 & he2130=0 & he1011=0     { *mult_addr = s0; mult_addr = mult_addr + 4; }
-stmiaRtype3:  stmiaRtype2^s0,   is stmiaRtype2  & s0  & he_s0=1 & (he2130!=0 | he1011!=0) { *mult_addr = s0; mult_addr = mult_addr + 4; }
-stmiaRtype3:  stmiaRtype2       is stmiaRtype2        & he_s0=0                           { }
-stmiaRtype4:  stmiaRtype3^s1    is stmiaRtype3  & s1  & he_s1=1 & he2130=0 & he_a0=0      { *mult_addr = s1; mult_addr = mult_addr + 4; }
-stmiaRtype4:  stmiaRtype3^s1,   is stmiaRtype3  & s1  & he_s1=1 & (he2130!=0 | he_a0!=0)  { *mult_addr = s1; mult_addr = mult_addr + 4; }
-stmiaRtype4:  stmiaRtype3       is stmiaRtype3        & he_s1=0                           { }
-stmiaRtype5:  stmiaRtype4^a0    is stmiaRtype4  & a0  & he_a0=1 & he2130=0                { *mult_addr = a0; mult_addr = mult_addr + 4; }
-stmiaRtype5:  stmiaRtype4^a0,   is stmiaRtype4  & a0  & he_a0=1 & he2130!=0               { *mult_addr = a0; mult_addr = mult_addr + 4; }
-stmiaRtype5:  stmiaRtype4       is stmiaRtype4        & he_a0=0                           { }
-stmiaRtype6:  stmiaRtype5^s2    is stmiaRtype5  & s2  & he_s2=1 & he2230=0                { *mult_addr = s2; mult_addr = mult_addr + 4; }
-stmiaRtype6:  stmiaRtype5^s2,   is stmiaRtype5  & s2  & he_s2=1 & he2230!=0               { *mult_addr = s2; mult_addr = mult_addr + 4; }
-stmiaRtype6:  stmiaRtype5       is stmiaRtype5        & he_s2=0                           { }
-stmiaRtype7:  stmiaRtype6^s3    is stmiaRtype6  & s3  & he_s3=1 & he2330=0                { *mult_addr = s3; mult_addr = mult_addr + 4; }
-stmiaRtype7:  stmiaRtype6^s3,   is stmiaRtype6  & s3  & he_s3=1 & he2330!=0               { *mult_addr = s3; mult_addr = mult_addr + 4; }
-stmiaRtype7:  stmiaRtype6       is stmiaRtype6        & he_s3=0                           { }
-stmiaRtype8:  stmiaRtype7^s4    is stmiaRtype7  & s4  & he_s4=1 & he2430=0                { *mult_addr = s4; mult_addr = mult_addr + 4; }
-stmiaRtype8:  stmiaRtype7^s4,   is stmiaRtype7  & s4  & he_s4=1 & he2430!=0               { *mult_addr = s4; mult_addr = mult_addr + 4; }
-stmiaRtype8:  stmiaRtype7       is stmiaRtype7        & he_s4=0                           { }
-stmiaRtype9:  stmiaRtype8^s5    is stmiaRtype8  & s5  & he_s5=1 & he2530=0                { *mult_addr = s5; mult_addr = mult_addr + 4; }
-stmiaRtype9:  stmiaRtype8^s5,   is stmiaRtype8  & s5  & he_s5=1 & he2530!=0               { *mult_addr = s5; mult_addr = mult_addr + 4; }
-stmiaRtype9:  stmiaRtype8       is stmiaRtype8        & he_s5=0                           { }
-stmiaRtype10: stmiaRtype9^s6    is stmiaRtype9  & s6  & he_s6=1 & he2630=0                { *mult_addr = s6; mult_addr = mult_addr + 4; }
-stmiaRtype10: stmiaRtype9^s6,   is stmiaRtype9  & s6  & he_s6=1 & he2630!=0               { *mult_addr = s6; mult_addr = mult_addr + 4; }
-stmiaRtype10: stmiaRtype9       is stmiaRtype9        & he_s6=0                           { }
-stmiaRtype11: stmiaRtype10^s7   is stmiaRtype10 & s7  & he_s7=1 & he2730=0                { *mult_addr = s7; mult_addr = mult_addr + 4; }
-stmiaRtype11: stmiaRtype10^s7,  is stmiaRtype10 & s7  & he_s7=1 & he2730!=0               { *mult_addr = s7; mult_addr = mult_addr + 4; }
-stmiaRtype11: stmiaRtype10      is stmiaRtype10       & he_s7=0                           { }
-stmiaRtype12: stmiaRtype11^s8   is stmiaRtype11 & s8  & he_s8=1 & he2830=0                { *mult_addr = s8; mult_addr = mult_addr + 4; }
-stmiaRtype12: stmiaRtype11^s8,  is stmiaRtype11 & s8  & he_s8=1 & he2830!=0               { *mult_addr = s8; mult_addr = mult_addr + 4; }
-stmiaRtype12: stmiaRtype11      is stmiaRtype11       & he_s8=0                           { }
-stmiaRtype13: stmiaRtype12^s9   is stmiaRtype12 & s9  & he_s9=1 & he2930=0                { *mult_addr = s9; mult_addr = mult_addr + 4; }
-stmiaRtype13: stmiaRtype12^s9,  is stmiaRtype12 & s9  & he_s9=1 & he2930!=0               { *mult_addr = s9; mult_addr = mult_addr + 4; }
-stmiaRtype13: stmiaRtype12      is stmiaRtype12       & he_s9=0                           { }
-stmiaRtype14: stmiaRtype13^s10  is stmiaRtype13 & s10 & he_s10=1 & he_s11=0               { *mult_addr = s10; mult_addr = mult_addr + 4; }
-stmiaRtype14: stmiaRtype13^s10, is stmiaRtype13 & s10 & he_s10=1 & he_s11=1               { *mult_addr = s10; mult_addr = mult_addr + 4; }
-stmiaRtype14: stmiaRtype13      is stmiaRtype13       & he_s10=0                          { }
-stmialist:    stmiaRtype14^s11  is stmiaRtype14 & s11 & he_s11=1                          { *mult_addr = s11; mult_addr = mult_addr + 4; }
-stmialist:    stmiaRtype14      is stmiaRtype14 &       he_s11=0                          { }
+stmiaR0type1:  ra                is                ra  & he_ra=1 & he2030=0 & he0811=0     { *mult_addr = ra; mult_addr = mult_addr + 4; }
+stmiaR0type1:  ra,               is                ra  & he_ra=1                           { *mult_addr = ra; mult_addr = mult_addr + 4; }
+stmiaR0type1:  ""                is                      he_ra=0                           { }
+stmiaR0type2:  stmiaR0type1^sp    is stmiaR0type1  & sp  & he_sp=1 & he2030=0 & he0911=0     { *mult_addr = sp; mult_addr = mult_addr + 4; }
+stmiaR0type2:  stmiaR0type1^sp,   is stmiaR0type1  & sp  & he_sp=1 & (he2030!=0 | he0911!=0) { *mult_addr = sp; mult_addr = mult_addr + 4; }
+stmiaR0type2:  stmiaR0type1       is stmiaR0type1        & he_sp=0                           { }
+stmiaR0type3:  stmiaR0type2^s0    is stmiaR0type2  & s0  & he_s0=1 & he2030=0 & he1011=0     { *mult_addr = s0; mult_addr = mult_addr + 4; }
+stmiaR0type3:  stmiaR0type2^s0,   is stmiaR0type2  & s0  & he_s0=1 & (he2030!=0 | he1011!=0) { *mult_addr = s0; mult_addr = mult_addr + 4; }
+stmiaR0type3:  stmiaR0type2       is stmiaR0type2        & he_s0=0                           { }
+stmiaR0type4:  stmiaR0type3^s1    is stmiaR0type3  & s1  & he_s1=1 & he2030=0 & he_a0=0      { *mult_addr = s1; mult_addr = mult_addr + 4; }
+stmiaR0type4:  stmiaR0type3^s1,   is stmiaR0type3  & s1  & he_s1=1 & (he2030!=0 | he_a0!=0)  { *mult_addr = s1; mult_addr = mult_addr + 4; }
+stmiaR0type4:  stmiaR0type3       is stmiaR0type3        & he_s1=0                           { }
+stmiaR0type5:  stmiaR0type4^a0    is stmiaR0type4  & a0  & he_a0=1 & he2030=0                { *mult_addr = a0; mult_addr = mult_addr + 4; }
+stmiaR0type5:  stmiaR0type4^a0,   is stmiaR0type4  & a0  & he_a0=1 & he2030!=0               { *mult_addr = a0; mult_addr = mult_addr + 4; }
+stmiaR0type5:  stmiaR0type4       is stmiaR0type4        & he_a0=0                           { }
+stmiaR0type6:  stmiaR0type5^a1    is stmiaR0type5  & a1  & he_a1=1 & he2130=0                { *mult_addr = a1; mult_addr = mult_addr + 4; }
+stmiaR0type6:  stmiaR0type5^a1,   is stmiaR0type5  & a1  & he_a1=1 & he2130!=0               { *mult_addr = a1; mult_addr = mult_addr + 4; }
+stmiaR0type6:  stmiaR0type5       is stmiaR0type5        & he_a1=0                           { }
+stmiaR0type7:  stmiaR0type6^s2    is stmiaR0type6  & s2  & he_s2=1 & he2230=0                { *mult_addr = s2; mult_addr = mult_addr + 4; }
+stmiaR0type7:  stmiaR0type6^s2,   is stmiaR0type6  & s2  & he_s2=1 & he2230!=0               { *mult_addr = s2; mult_addr = mult_addr + 4; }
+stmiaR0type7:  stmiaR0type6       is stmiaR0type6        & he_s2=0                           { }
+stmiaR0type8:  stmiaR0type7^s3    is stmiaR0type7  & s3  & he_s3=1 & he2330=0                { *mult_addr = s3; mult_addr = mult_addr + 4; }
+stmiaR0type8:  stmiaR0type7^s3,   is stmiaR0type7  & s3  & he_s3=1 & he2330!=0               { *mult_addr = s3; mult_addr = mult_addr + 4; }
+stmiaR0type8:  stmiaR0type7       is stmiaR0type7        & he_s3=0                           { }
+stmiaR0type9:  stmiaR0type8^s4    is stmiaR0type8  & s4  & he_s4=1 & he2430=0                { *mult_addr = s4; mult_addr = mult_addr + 4; }
+stmiaR0type9:  stmiaR0type8^s4,   is stmiaR0type8  & s4  & he_s4=1 & he2430!=0               { *mult_addr = s4; mult_addr = mult_addr + 4; }
+stmiaR0type9:  stmiaR0type8       is stmiaR0type8        & he_s4=0                           { }
+stmiaR0type10: stmiaR0type9^s5    is stmiaR0type9  & s5  & he_s5=1 & he2530=0                { *mult_addr = s5; mult_addr = mult_addr + 4; }
+stmiaR0type10: stmiaR0type9^s5,   is stmiaR0type9  & s5  & he_s5=1 & he2530!=0               { *mult_addr = s5; mult_addr = mult_addr + 4; }
+stmiaR0type10: stmiaR0type9       is stmiaR0type9        & he_s5=0                           { }
+stmiaR0type11: stmiaR0type10^s6   is stmiaR0type10 & s6  & he_s6=1 & he2630=0                { *mult_addr = s6; mult_addr = mult_addr + 4; }
+stmiaR0type11: stmiaR0type10^s6,  is stmiaR0type10 & s6  & he_s6=1 & he2630!=0               { *mult_addr = s6; mult_addr = mult_addr + 4; }
+stmiaR0type11: stmiaR0type10      is stmiaR0type10       & he_s6=0                           { }
+stmiaR0type12: stmiaR0type11^s7   is stmiaR0type11 & s7  & he_s7=1 & he2730=0                { *mult_addr = s7; mult_addr = mult_addr + 4; }
+stmiaR0type12: stmiaR0type11^s7,  is stmiaR0type11 & s7  & he_s7=1 & he2730!=0               { *mult_addr = s7; mult_addr = mult_addr + 4; }
+stmiaR0type12: stmiaR0type11      is stmiaR0type11       & he_s7=0                           { }
+stmiaR0type13: stmiaR0type12^s8   is stmiaR0type12 & s8  & he_s8=1 & he2830=0                { *mult_addr = s8; mult_addr = mult_addr + 4; }
+stmiaR0type13: stmiaR0type12^s8,  is stmiaR0type12 & s8  & he_s8=1 & he2830!=0               { *mult_addr = s8; mult_addr = mult_addr + 4; }
+stmiaR0type13: stmiaR0type12      is stmiaR0type12       & he_s8=0                           { }
+stmiaR0type14: stmiaR0type13^s9   is stmiaR0type13 & s9  & he_s9=1 & he2930=0                { *mult_addr = s9; mult_addr = mult_addr + 4; }
+stmiaR0type14: stmiaR0type13^s9,  is stmiaR0type13 & s9  & he_s9=1 & he2930!=0               { *mult_addr = s9; mult_addr = mult_addr + 4; }
+stmiaR0type14: stmiaR0type13      is stmiaR0type13       & he_s9=0                           { }
+stmiaR0type15: stmiaR0type14^s10  is stmiaR0type14 & s10 & he_s10=1 & he_s11=0               { *mult_addr = s10; mult_addr = mult_addr + 4; }
+stmiaR0type15: stmiaR0type14^s10, is stmiaR0type14 & s10 & he_s10=1 & he_s11=1               { *mult_addr = s10; mult_addr = mult_addr + 4; }
+stmiaR0type15: stmiaR0type14      is stmiaR0type14       & he_s10=0                          { }
+stmialist0:    stmiaR0type15^s11  is stmiaR0type15 & s11 & he_s11=1                          { *mult_addr = s11; mult_addr = mult_addr + 4; }
+stmialist0:    stmiaR0type15      is stmiaR0type15 &       he_s11=0                          { }
 
-stmiabrace: {stmialist} is stmialist { }
 
-ldmiaRtype1:  ra                is                ra  & he_ra=1 & he2130=0 & he0811=0     { ra = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype1:  ra,               is                ra  & he_ra=1                           { ra = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype1:  ""                is                      he_ra=0                           { }
-ldmiaRtype2:  ldmiaRtype1^sp    is ldmiaRtype1  & sp  & he_sp=1 & he2130=0 & he0911=0     { sp = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype2:  ldmiaRtype1^sp,   is ldmiaRtype1  & sp  & he_sp=1 & (he2130!=0 | he0911!=0) { sp = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype2:  ldmiaRtype1       is ldmiaRtype1        & he_sp=0                           { }
-ldmiaRtype3:  ldmiaRtype2^s0    is ldmiaRtype2  & s0  & he_s0=1 & he2130=0 & he1011=0     { s0 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype3:  ldmiaRtype2^s0,   is ldmiaRtype2  & s0  & he_s0=1 & (he2130!=0 | he1011!=0) { s0 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype3:  ldmiaRtype2       is ldmiaRtype2        & he_s0=0                           { }
-ldmiaRtype4:  ldmiaRtype3^s1    is ldmiaRtype3  & s1  & he_s1=1 & he2130=0 & he_a0=0      { s1 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype4:  ldmiaRtype3^s1,   is ldmiaRtype3  & s1  & he_s1=1 & (he2130!=0 | he_a0!=0)  { s1 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype4:  ldmiaRtype3       is ldmiaRtype3        & he_s1=0                           { }
-ldmiaRtype5:  ldmiaRtype4^a0    is ldmiaRtype4  & a0  & he_a0=1 & he2130=0                { a0 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype5:  ldmiaRtype4^a0,   is ldmiaRtype4  & a0  & he_a0=1 & he2130!=0               { a0 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype5:  ldmiaRtype4       is ldmiaRtype4        & he_a0=0                           { }
-ldmiaRtype6:  ldmiaRtype5^s2    is ldmiaRtype5  & s2  & he_s2=1 & he2230=0                { s2 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype6:  ldmiaRtype5^s2,   is ldmiaRtype5  & s2  & he_s2=1 & he2230!=0               { s2 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype6:  ldmiaRtype5       is ldmiaRtype5        & he_s2=0                           { }
-ldmiaRtype7:  ldmiaRtype6^s3    is ldmiaRtype6  & s3  & he_s3=1 & he2330=0                { s3 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype7:  ldmiaRtype6^s3,   is ldmiaRtype6  & s3  & he_s3=1 & he2330!=0               { s3 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype7:  ldmiaRtype6       is ldmiaRtype6        & he_s3=0                           { }
-ldmiaRtype8:  ldmiaRtype7^s4    is ldmiaRtype7  & s4  & he_s4=1 & he2430=0                { s4 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype8:  ldmiaRtype7^s4,   is ldmiaRtype7  & s4  & he_s4=1 & he2430!=0               { s4 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype8:  ldmiaRtype7       is ldmiaRtype7        & he_s4=0                           { }
-ldmiaRtype9:  ldmiaRtype8^s5    is ldmiaRtype8  & s5  & he_s5=1 & he2530=0                { s5 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype9:  ldmiaRtype8^s5,   is ldmiaRtype8  & s5  & he_s5=1 & he2530!=0               { s5 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype9:  ldmiaRtype8       is ldmiaRtype8        & he_s5=0                           { }
-ldmiaRtype10: ldmiaRtype9^s6    is ldmiaRtype9  & s6  & he_s6=1 & he2630=0                { s6 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype10: ldmiaRtype9^s6,   is ldmiaRtype9  & s6  & he_s6=1 & he2630!=0               { s6 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype10: ldmiaRtype9       is ldmiaRtype9        & he_s6=0                           { }
-ldmiaRtype11: ldmiaRtype10^s7   is ldmiaRtype10 & s7  & he_s7=1 & he2730=0                { s7 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype11: ldmiaRtype10^s7,  is ldmiaRtype10 & s7  & he_s7=1 & he2730!=0               { s7 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype11: ldmiaRtype10      is ldmiaRtype10       & he_s7=0                           { }
-ldmiaRtype12: ldmiaRtype11^s8   is ldmiaRtype11 & s8  & he_s8=1 & he2830=0                { s8 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype12: ldmiaRtype11^s8,  is ldmiaRtype11 & s8  & he_s8=1 & he2830!=0               { s8 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype12: ldmiaRtype11      is ldmiaRtype11       & he_s8=0                           { }
-ldmiaRtype13: ldmiaRtype12^s9   is ldmiaRtype12 & s9  & he_s9=1 & he2930=0                { s9 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype13: ldmiaRtype12^s9,  is ldmiaRtype12 & s9  & he_s9=1 & he2930!=0               { s9 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype13: ldmiaRtype12      is ldmiaRtype12       & he_s9=0                           { }
-ldmiaRtype14: ldmiaRtype13^s10  is ldmiaRtype13 & s10 & he_s10=1 & he_s11=0               { s10 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype14: ldmiaRtype13^s10, is ldmiaRtype13 & s10 & he_s10=1 & he_s11=1               { s10 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmiaRtype14: ldmiaRtype13      is ldmiaRtype13       & he_s10=0                          { }
-ldmialist:    ldmiaRtype14^s11  is ldmiaRtype14 & s11 & he_s11=1                          { s11 = *mult_addr; mult_addr = mult_addr + 4; }
-ldmialist:    ldmiaRtype14      is ldmiaRtype14 &       he_s11=0                          { }
+stmiaR1type1:  ra                is                ra  & he_ra=1 & he2030=0 & he0811=0     { *mult_addr = ra; mult_addr = mult_addr + 4; }
+stmiaR1type1:  ra,               is                ra  & he_ra=1                           { *mult_addr = ra; mult_addr = mult_addr + 4; }
+stmiaR1type1:  ""                is                      he_ra=0                           { }
+stmiaR1type2:  stmiaR1type1^t0    is stmiaR1type1  & t0  & he_t0=1 & he2030=0 & he0911=0     { *mult_addr = t0; mult_addr = mult_addr + 4; }
+stmiaR1type2:  stmiaR1type1^t0,   is stmiaR1type1  & t0  & he_t0=1 & (he2030!=0 | he0911!=0) { *mult_addr = t0; mult_addr = mult_addr + 4; }
+stmiaR1type2:  stmiaR1type1       is stmiaR1type1        & he_t0=0                           { }
+stmiaR1type3:  stmiaR1type2^t1    is stmiaR1type2  & t1  & he_t1=1 & he2030=0 & he1011=0     { *mult_addr = t1; mult_addr = mult_addr + 4; }
+stmiaR1type3:  stmiaR1type2^t1,   is stmiaR1type2  & t1  & he_t1=1 & (he2030!=0 | he1011!=0) { *mult_addr = t1; mult_addr = mult_addr + 4; }
+stmiaR1type3:  stmiaR1type2       is stmiaR1type2        & he_t1=0                           { }
+stmiaR1type4:  stmiaR1type3^t2    is stmiaR1type3  & t2  & he_t2=1 & he2030=0 & he_a0=0      { *mult_addr = t2; mult_addr = mult_addr + 4; }
+stmiaR1type4:  stmiaR1type3^t2,   is stmiaR1type3  & t2  & he_t2=1 & (he2030!=0 | he_a0!=0)  { *mult_addr = t2; mult_addr = mult_addr + 4; }
+stmiaR1type4:  stmiaR1type3       is stmiaR1type3        & he_t2=0                           { }
+stmiaR1type5:  stmiaR1type4^a0    is stmiaR1type4  & a0  & he_a0=1 & he2030=0                { *mult_addr = a0; mult_addr = mult_addr + 4; }
+stmiaR1type5:  stmiaR1type4^a0,   is stmiaR1type4  & a0  & he_a0=1 & he2030!=0               { *mult_addr = a0; mult_addr = mult_addr + 4; }
+stmiaR1type5:  stmiaR1type4       is stmiaR1type4        & he_a0=0                           { }
+stmiaR1type6:  stmiaR1type5^a1    is stmiaR1type5  & a1  & he_a1=1 & he2130=0                { *mult_addr = a1; mult_addr = mult_addr + 4; }
+stmiaR1type6:  stmiaR1type5^a1,   is stmiaR1type5  & a1  & he_a1=1 & he2130!=0               { *mult_addr = a1; mult_addr = mult_addr + 4; }
+stmiaR1type6:  stmiaR1type5       is stmiaR1type5        & he_a1=0                           { }
+stmiaR1type7:  stmiaR1type6^a2    is stmiaR1type6  & a2  & he_a2=1 & he2230=0                { *mult_addr = a2; mult_addr = mult_addr + 4; }
+stmiaR1type7:  stmiaR1type6^a2,   is stmiaR1type6  & a2  & he_a2=1 & he2230!=0               { *mult_addr = a2; mult_addr = mult_addr + 4; }
+stmiaR1type7:  stmiaR1type6       is stmiaR1type6        & he_a2=0                           { }
+stmiaR1type8:  stmiaR1type7^a3    is stmiaR1type7  & a3  & he_a3=1 & he2330=0                { *mult_addr = a3; mult_addr = mult_addr + 4; }
+stmiaR1type8:  stmiaR1type7^a3,   is stmiaR1type7  & a3  & he_a3=1 & he2330!=0               { *mult_addr = a3; mult_addr = mult_addr + 4; }
+stmiaR1type8:  stmiaR1type7       is stmiaR1type7        & he_a3=0                           { }
+stmiaR1type9:  stmiaR1type8^a4    is stmiaR1type8  & a4  & he_a4=1 & he2430=0                { *mult_addr = a4; mult_addr = mult_addr + 4; }
+stmiaR1type9:  stmiaR1type8^a4,   is stmiaR1type8  & a4  & he_a4=1 & he2430!=0               { *mult_addr = a4; mult_addr = mult_addr + 4; }
+stmiaR1type9:  stmiaR1type8       is stmiaR1type8        & he_a4=0                           { }
+stmiaR1type10: stmiaR1type9^a5    is stmiaR1type9  & a5  & he_a5=1 & he2530=0                { *mult_addr = a5; mult_addr = mult_addr + 4; }
+stmiaR1type10: stmiaR1type9^a5,   is stmiaR1type9  & a5  & he_a5=1 & he2530!=0               { *mult_addr = a5; mult_addr = mult_addr + 4; }
+stmiaR1type10: stmiaR1type9       is stmiaR1type9        & he_a5=0                           { }
+stmiaR1type11: stmiaR1type10^a6   is stmiaR1type10 & a6  & he_a6=1 & he2630=0                { *mult_addr = a6; mult_addr = mult_addr + 4; }
+stmiaR1type11: stmiaR1type10^a6,  is stmiaR1type10 & a6  & he_a6=1 & he2630!=0               { *mult_addr = a6; mult_addr = mult_addr + 4; }
+stmiaR1type11: stmiaR1type10      is stmiaR1type10       & he_a6=0                           { }
+stmiaR1type12: stmiaR1type11^a7   is stmiaR1type11 & a7  & he_a7=1 & he2730=0                { *mult_addr = a7; mult_addr = mult_addr + 4; }
+stmiaR1type12: stmiaR1type11^a7,  is stmiaR1type11 & a7  & he_a7=1 & he2730!=0               { *mult_addr = a7; mult_addr = mult_addr + 4; }
+stmiaR1type12: stmiaR1type11      is stmiaR1type11       & he_a7=0                           { }
+stmiaR1type13: stmiaR1type12^t3   is stmiaR1type12 & t3  & he_t3=1 & he2830=0                { *mult_addr = t3; mult_addr = mult_addr + 4; }
+stmiaR1type13: stmiaR1type12^t3,  is stmiaR1type12 & t3  & he_t3=1 & he2830!=0               { *mult_addr = t3; mult_addr = mult_addr + 4; }
+stmiaR1type13: stmiaR1type12      is stmiaR1type12       & he_t3=0                           { }
+stmiaR1type14: stmiaR1type13^t4   is stmiaR1type13 & t4  & he_t4=1 & he2930=0                { *mult_addr = t4; mult_addr = mult_addr + 4; }
+stmiaR1type14: stmiaR1type13^t4,  is stmiaR1type13 & t4  & he_t4=1 & he2930!=0               { *mult_addr = t4; mult_addr = mult_addr + 4; }
+stmiaR1type14: stmiaR1type13      is stmiaR1type13       & he_t4=0                           { }
+stmiaR1type15: stmiaR1type14^t5   is stmiaR1type14 & t5  & he_t5=1 & he_t6=0                 { *mult_addr = t5; mult_addr = mult_addr + 4; }
+stmiaR1type15: stmiaR1type14^t5,  is stmiaR1type14 & t5  & he_t5=1 & he_t6=1                 { *mult_addr = t5; mult_addr = mult_addr + 4; }
+stmiaR1type15: stmiaR1type14      is stmiaR1type14       & he_t5=0                           { }
+stmialist1:    stmiaR1type15^t6   is stmiaR1type15 & t6  & he_t6=1                           { *mult_addr = t6; mult_addr = mult_addr + 4; }
+stmialist1:    stmiaR1type15      is stmiaR1type15 &       he_t6=0                           { }
 
-ldmiabrace: {ldmialist} is ldmialist { }
+stmiabrace: {stmialist0} is stmialist0 & he3131=0x0 { }
+stmiabrace: {stmialist1} is stmialist1 & he3131=0x1 { }
+
+ldmiaR0type1:  ra                is                ra  & he_ra=1 & he2030=0 & he0811=0     { ra = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type1:  ra,               is                ra  & he_ra=1                           { ra = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type1:  ""                is                      he_ra=0                           { }
+ldmiaR0type2:  ldmiaR0type1^sp    is ldmiaR0type1  & sp  & he_sp=1 & he2030=0 & he0911=0     { sp = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type2:  ldmiaR0type1^sp,   is ldmiaR0type1  & sp  & he_sp=1 & (he2030!=0 | he0911!=0) { sp = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type2:  ldmiaR0type1       is ldmiaR0type1        & he_sp=0                           { }
+ldmiaR0type3:  ldmiaR0type2^s0    is ldmiaR0type2  & s0  & he_s0=1 & he2030=0 & he1011=0     { s0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type3:  ldmiaR0type2^s0,   is ldmiaR0type2  & s0  & he_s0=1 & (he2030!=0 | he1011!=0) { s0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type3:  ldmiaR0type2       is ldmiaR0type2        & he_s0=0                           { }
+ldmiaR0type4:  ldmiaR0type3^s1,   is ldmiaR0type3  & s1  & he_s1=1 & (he2030!=0 | he_a0!=0)  { s1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type4:  ldmiaR0type3^s1    is ldmiaR0type3  & s1  & he_s1=1 & he2030=0 & he_a0=0      { s1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type4:  ldmiaR0type3       is ldmiaR0type3        & he_s1=0                           { }
+ldmiaR0type5:  ldmiaR0type4^a0    is ldmiaR0type4  & a0  & he_a0=1 & he2030=0                { a0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type5:  ldmiaR0type4^a0,   is ldmiaR0type4  & a0  & he_a0=1 & he2030!=0               { a0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type5:  ldmiaR0type4       is ldmiaR0type4        & he_a0=0                           { }
+ldmiaR0type6:  ldmiaR0type5^a1    is ldmiaR0type5  & a1  & he_a1=1 & he2130=0                { a1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type6:  ldmiaR0type5^a1,   is ldmiaR0type5  & a1  & he_a1=1 & he2130!=0               { a1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type6:  ldmiaR0type5       is ldmiaR0type5        & he_a1=0                           { }
+ldmiaR0type7:  ldmiaR0type6^s2    is ldmiaR0type6  & s2  & he_s2=1 & he2230=0                { s2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type7:  ldmiaR0type6^s2,   is ldmiaR0type6  & s2  & he_s2=1 & he2230!=0               { s2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type7:  ldmiaR0type6       is ldmiaR0type6        & he_s2=0                           { }
+ldmiaR0type8:  ldmiaR0type7^s3    is ldmiaR0type7  & s3  & he_s3=1 & he2330=0                { s3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type8:  ldmiaR0type7^s3,   is ldmiaR0type7  & s3  & he_s3=1 & he2330!=0               { s3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type8:  ldmiaR0type7       is ldmiaR0type7        & he_s3=0                           { }
+ldmiaR0type9:  ldmiaR0type8^s4    is ldmiaR0type8  & s4  & he_s4=1 & he2430=0                { s4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type9:  ldmiaR0type8^s4,   is ldmiaR0type8  & s4  & he_s4=1 & he2430!=0               { s4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type9:  ldmiaR0type8       is ldmiaR0type8        & he_s4=0                           { }
+ldmiaR0type10: ldmiaR0type9^s5    is ldmiaR0type9  & s5  & he_s5=1 & he2530=0                { s5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type10: ldmiaR0type9^s5,   is ldmiaR0type9  & s5  & he_s5=1 & he2530!=0               { s5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type10: ldmiaR0type9       is ldmiaR0type9        & he_s5=0                           { }
+ldmiaR0type11: ldmiaR0type10^s6   is ldmiaR0type10 & s6  & he_s6=1 & he2630=0                { s6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type11: ldmiaR0type10^s6,  is ldmiaR0type10 & s6  & he_s6=1 & he2630!=0               { s6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type11: ldmiaR0type10      is ldmiaR0type10       & he_s6=0                           { }
+ldmiaR0type12: ldmiaR0type11^s7   is ldmiaR0type11 & s7  & he_s7=1 & he2730=0                { s7 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type12: ldmiaR0type11^s7,  is ldmiaR0type11 & s7  & he_s7=1 & he2730!=0               { s7 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type12: ldmiaR0type11      is ldmiaR0type11       & he_s7=0                           { }
+ldmiaR0type13: ldmiaR0type12^s8   is ldmiaR0type12 & s8  & he_s8=1 & he2830=0                { s8 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type13: ldmiaR0type12^s8,  is ldmiaR0type12 & s8  & he_s8=1 & he2830!=0               { s8 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type13: ldmiaR0type12      is ldmiaR0type12       & he_s8=0                           { }
+ldmiaR0type14: ldmiaR0type13^s9   is ldmiaR0type13 & s9  & he_s9=1 & he2930=0                { s9 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type14: ldmiaR0type13^s9,  is ldmiaR0type13 & s9  & he_s9=1 & he2930!=0               { s9 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type14: ldmiaR0type13      is ldmiaR0type13       & he_s9=0                           { }
+ldmiaR0type15: ldmiaR0type14^s10  is ldmiaR0type14 & s10 & he_s10=1 & he_s11=0               { s10 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type15: ldmiaR0type14^s10, is ldmiaR0type14 & s10 & he_s10=1 & he_s11=1               { s10 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR0type15: ldmiaR0type14      is ldmiaR0type14       & he_s10=0                          { }
+ldmialist0:    ldmiaR0type15^s11  is ldmiaR0type15 & s11 & he_s11=1                          { s11 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmialist0:    ldmiaR0type15      is ldmiaR0type15 &       he_s11=0                          { }
+
+ldmiaR1type1:  ra                is                ra  & he_ra=1 & he2030=0 & he0811=0     { ra = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type1:  ra,               is                ra  & he_ra=1                           { ra = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type1:  ""                is                      he_ra=0                           { }
+ldmiaR1type2:  ldmiaR1type1^t0    is ldmiaR1type1  & t0  & he_t0=1 & he2030=0 & he0911=0     { t0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type2:  ldmiaR1type1^t0,   is ldmiaR1type1  & t0  & he_t0=1 & (he2030!=0 | he0911!=0) { t0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type2:  ldmiaR1type1       is ldmiaR1type1        & he_t0=0                           { }
+ldmiaR1type3:  ldmiaR1type2^t1    is ldmiaR1type2  & t1  & he_t1=1 & he2030=0 & he1011=0     { t1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type3:  ldmiaR1type2^t1,   is ldmiaR1type2  & t1  & he_t1=1 & (he2030!=0 | he1011!=0) { t1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type3:  ldmiaR1type2       is ldmiaR1type2        & he_t1=0                           { }
+ldmiaR1type4:  ldmiaR1type3^t2    is ldmiaR1type3  & t2  & he_t2=1 & he2030=0 & he_a0=0      { t2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type4:  ldmiaR1type3^t2,   is ldmiaR1type3  & t2  & he_t2=1 & (he2030!=0 | he_a0!=0)  { t2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type4:  ldmiaR1type3       is ldmiaR1type3        & he_t2=0                           { }
+ldmiaR1type5:  ldmiaR1type4^a0    is ldmiaR1type4  & a0  & he_a0=1 & he2030=0                { a0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type5:  ldmiaR1type4^a0,   is ldmiaR1type4  & a0  & he_a0=1 & he2030!=0               { a0 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type5:  ldmiaR1type4       is ldmiaR1type4        & he_a0=0                           { }
+ldmiaR1type6:  ldmiaR1type5^a1    is ldmiaR1type5  & a1  & he_a1=1 & he2130=0                { a1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type6:  ldmiaR1type5^a1,   is ldmiaR1type5  & a1  & he_a1=1 & he2130!=0               { a1 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type6:  ldmiaR1type5       is ldmiaR1type5        & he_a1=0                           { }
+ldmiaR1type7:  ldmiaR1type6^a2    is ldmiaR1type6  & a2  & he_a2=1 & he2230=0                { a2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type7:  ldmiaR1type6^a2,   is ldmiaR1type6  & a2  & he_a2=1 & he2230!=0               { a2 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type7:  ldmiaR1type6       is ldmiaR1type6        & he_a2=0                           { }
+ldmiaR1type8:  ldmiaR1type7^a3    is ldmiaR1type7  & a3  & he_a3=1 & he2330=0                { a3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type8:  ldmiaR1type7^a3,   is ldmiaR1type7  & a3  & he_a3=1 & he2330!=0               { a3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type8:  ldmiaR1type7       is ldmiaR1type7        & he_a3=0                           { }
+ldmiaR1type9:  ldmiaR1type8^a4    is ldmiaR1type8  & a4  & he_a4=1 & he2430=0                { a4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type9:  ldmiaR1type8^a4,   is ldmiaR1type8  & a4  & he_a4=1 & he2430!=0               { a4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type9:  ldmiaR1type8       is ldmiaR1type8        & he_a4=0                           { }
+ldmiaR1type10: ldmiaR1type9^a5    is ldmiaR1type9  & a5  & he_a5=1 & he2530=0                { a5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type10: ldmiaR1type9^a5,   is ldmiaR1type9  & a5  & he_a5=1 & he2530!=0               { a5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type10: ldmiaR1type9       is ldmiaR1type9        & he_a5=0                           { }
+ldmiaR1type11: ldmiaR1type10^a6   is ldmiaR1type10 & a6  & he_a6=1 & he2630=0                { a6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type11: ldmiaR1type10^a6,  is ldmiaR1type10 & a6  & he_a6=1 & he2630!=0               { a6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type11: ldmiaR1type10      is ldmiaR1type10       & he_a6=0                           { }
+ldmiaR1type12: ldmiaR1type11^a7   is ldmiaR1type11 & a7  & he_a7=1 & he2730=0                { a7 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type12: ldmiaR1type11^a7,  is ldmiaR1type11 & a7  & he_a7=1 & he2730!=0               { a7 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type12: ldmiaR1type11      is ldmiaR1type11       & he_a7=0                           { }
+ldmiaR1type13: ldmiaR1type12^t3   is ldmiaR1type12 & t3  & he_t3=1 & he2830=0                { t3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type13: ldmiaR1type12^t3,  is ldmiaR1type12 & t3  & he_t3=1 & he2830!=0               { t3 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type13: ldmiaR1type12      is ldmiaR1type12       & he_t3=0                           { }
+ldmiaR1type14: ldmiaR1type13^t4   is ldmiaR1type13 & t4  & he_t4=1 & he2930=0                { t4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type14: ldmiaR1type13^t4,  is ldmiaR1type13 & t4  & he_t4=1 & he2930!=0               { t4 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type14: ldmiaR1type13      is ldmiaR1type13       & he_t4=0                           { }
+ldmiaR1type15: ldmiaR1type14^t5   is ldmiaR1type14 & t5  & he_t5=1 & he_t6=0                 { t5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type15: ldmiaR1type14^t5,  is ldmiaR1type14 & t5  & he_t5=1 & he_t6=1                 { t5 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmiaR1type15: ldmiaR1type14      is ldmiaR1type14       & he_t5=0                           { }
+ldmialist1:    ldmiaR1type15^t6   is ldmiaR1type15 & t6  & he_t6=1                           { t6 = *mult_addr; mult_addr = mult_addr + 4; }
+ldmialist1:    ldmiaR1type15      is ldmiaR1type15 &       he_t6=0                           { }
+
+ldmiabrace: {ldmialist0} is ldmialist0 & he3131=0x0 { }
+ldmiabrace: {ldmialist1} is ldmialist1 & he3131=0x1 { }
 
 uimmt0: _uimm is hcuimm0506 & hcuimm1011 & hcuimm1212 [ _uimm = hcuimm1212 | (hcuimm0506 << 1) | (hcuimm1011 << 3); ] {local uimm:$(XLEN) = _uimm;export uimm;}
 uimmt1: _uimm is hcuimm0506 & hcuimm1012 [ _uimm = 0x0 | hcuimm0506 << 1 | (hcuimm1012 << 3); ] {local uimm:$(XLEN) = _uimm;export uimm;}
@@ -541,9 +662,13 @@ offsett0: reloc is heoffset0711 & heoffset2022 & heoffset2323 [ reloc = inst_sta
 #   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
 #   | 31 | 30 | 29 | 28 | 27 | 26 | 25 | 24 | 23 | 22 | 21 | 20 | 19 : 15 | 14 | 13 | 12 | 11 | 10 | 9 | 8 | 7 | 6 : 0 | instruction    |
 #   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
-#   | 0  |s11 |s10 | s9 | s8 | s7 | s6 | s5 | s4 | s3 | s2 | 0  |   rs1   | 001          | a0 | s1 |s0 |sp |ra |0001011| STMIA          |
+#   | 0  |s11 |s10 | s9 | s8 | s7 | s6 | s5 | s4 | s3 | s2 | a1 |   rs1   | 001          | a0 | s1 |s0 |sp |ra |0001011| STMIA          |
 #   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
-#   | 0  |s11 |s10 | s9 | s8 | s7 | s6 | s5 | s4 | s3 | s2 | 0  |   rs1   | 000          | a0 | s1 |s0 |sp |ra |0001011| LDMIA          |
+#   | 1  |t6  |t5  | t4 | t3 | a7 | a6 | a5 | a4 | a3 | a2 | a1 |   rs1   | 001          | a0 | t2 |t1 |t0 |ra |0001011| STMIA          |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
+#   | 0  |s11 |s10 | s9 | s8 | s7 | s6 | s5 | s4 | s3 | s2 | a1 |   rs1   | 000          | a0 | s1 |s0 |sp |ra |0001011| LDMIA          |
+#   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
+#   | 1  |t6  |t5  | t4 | t3 | a7 | a6 | a5 | a4 | a3 | a2 | a1 |   rs1   | 000          | a0 | t2 |t1 |t0 |ra |0001011| LDMIA          |
 #   +----+----+----+----+----+----+----+----+----+----+----+----+---------+----+----+----+----+----+---+---+---+-------+----------------+
 
 :stmia stmiabrace,(hers1) is stmiabrace & hers1 & heop0006=0xb & heop1214=1
